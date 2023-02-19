@@ -1,93 +1,135 @@
-let arr=[];
- let d=document.querySelector('.t');
-let a=document.querySelector(".issue");
 
-let tbl=document.querySelector('tbody');
-let count=0;
-function fun(){
-  let tr=document.createElement('tr');
-let td1=tr.appendChild(document.createElement('td'));
-let td2=tr.appendChild(document.createElement('td'));
-let td3=tr.appendChild(document.createElement('td'));
-let td4=tr.appendChild(document.createElement('td'));
-let td5=tr.appendChild(document.createElement('td'));
-let date=new Date().toLocaleString();
-// alert(date);
-     let name=document.querySelector(".name").value;
-     let to=document.querySelector(".issued").value;
-     let st=document.createElement('span');
-     st.classList.add('red');
-     st.innerHTML="Not Returned"
-    //  let status=st;
-     let id=arr.length+1;
-     let obj={id,name,to,date,st};
- arr.push(obj);
-   td2.innerHTML=name;
-   td3.innerHTML=to;
-   td1.innerHTML=id;
-   td4.innerHTML=date;
-   td5.appendChild(st);
-  
-   td5.innerHTML+=' <a onclick="fun2('+id+')""><span class="material-icons md-36">edit_square</span></a>';
-  // console.log(a);
-  // td5.innerHTML+=a; 
-  if(!name=="" && !to=="")
-   tbl.append(tr);
- name="";
- to="";
-}
-function fun2(id){
-  let st1=document.createElement('span');
-  let curr=arr[id-1].st;
-  // console.log(curr.classList);
-  
-  if(curr.innerHTML.includes('Not')){
-    let st1=document.createElement('span');
-    st1.classList.add('green');
-    st1.innerHTML="Returned"
-    arr[id-1].st=st1;
-    console.log(st1);
-  }
-  else{
-    let st1=document.createElement('span');
-    st1.classList.add('red');
-    st1.innerHTML="Not Returned"
-    arr[id-1].st=st1;
-  }
-  
-  rander();
+const bookNameElement = document.getElementById('book-name');
+const issueToElement = document.getElementById("issue-to");
+const btnElement = document.getElementById('btn');
+const tableBody = document.querySelector("tbody");
+const books = [
+];
+
+function handleEdit(event) {
+   const buttonElement  = event.target;
+   console.log(buttonElement);
+    const id = buttonElement.id;
+
+   if (buttonElement.textContent === 'Edit') {
+    event.target.textContent = "Save";
+    const parentElement = buttonElement.parentElement;
+
+    parentElement.removeChild(parentElement.firstChild);
+
+    const input = document.createElement("input");
+    input.id = 'status-inp';
+    input.value = books[id - 1].status;
+    parentElement.insertBefore(input, event.target);
+   } 
+   else{
+      const statusElement = document.getElementById('status-inp');
+      books[id - 1].status = statusElement.value;
+      renderBooksInsideTable();
+   }
 
 }
-function rander(){
+function createTableRow (data, tableBody, bookId) {
+    // First create a tr
+    //  const tr = `
+    //   <tr>
+    //     <td> ${index} </td>
+    //     <td> ${data.name} </td>
+    //     <td> ${data.status} </td>
+    //   </tr>
+    //  `;
 
-  tbl.innerHTML='';
-  arr.forEach(ele => {
-    let tr=document.createElement('tr');
-    let td1=tr.appendChild(document.createElement('td'));
-    let td2=tr.appendChild(document.createElement('td'));
-    let td3=tr.appendChild(document.createElement('td'));
-    let td4=tr.appendChild(document.createElement('td'));
-    let td5=tr.appendChild(document.createElement('td'));
+    //  tableBody.innerHtml += tr;
+
+    const tr = document.createElement("tr");
+    // create 5 ths and add data inside it
+
+    const idTd = document.createElement("td");
+    idTd.textContent = bookId;
+
+    const bookNameTd = document.createElement("td");
+    bookNameTd.textContent = data.name;
+
+     const issueToTd = document.createElement("td");
+     issueToTd.textContent = data.issuedTo;
 
 
-         let name=ele.name;
-         let to=ele.to;
-         let status=ele.st;
-         let id=ele.id;
-         let date=ele.date;
-         td1.innerHTML=id;
-         td2.innerHTML=name;
-       td3.innerHTML=to;
-       td4.innerHTML=date;
-       td5.appendChild(status);
-       td5.innerHTML+=' <a onclick="fun2('+id+')"><span class="material-icons md-36">edit_square</span></a>';
-       tbl.append(tr);
-  });
+    const issuedAtTd = document.createElement("td");
+    issuedAtTd.textContent = data.issuedAt;
 
+    const statusTd = document.createElement("td");
+    statusTd.classList.add('flex');
+
+    const button = document.createElement('button');
+    const span = document.createElement('span');
+
+    span.textContent = data.status;
+    const className = data.status === "not returned" ? "red" : "green";
+    span.classList.add(className);
+
+    button.textContent = 'Edit';
+    button.id = bookId;
+    button.addEventListener("click", handleEdit);
+
+    statusTd.appendChild(span);
+    statusTd.appendChild(button);
+     
+    // add these ths in tr 
+
+    tr.appendChild(idTd);
+    tr.appendChild(bookNameTd);
+    tr.appendChild(issueToTd);
+    tr.appendChild(issuedAtTd);
+    tr.appendChild(statusTd);
+
+    // add this tr in tbody
+    tableBody.appendChild(tr);
 }
-a.addEventListener('click',fun);
-// let b=document.querySelector('a');
-function f(){
-alert("hi");
+
+/**
+ * This will render all items present in the books into table
+ */
+function renderBooksInsideTable() {
+
+    // while(tableBody.firstChild) {
+    //     tableBody.removeChild(tableBody.firstChild)
+    // }
+
+    tableBody.innerHTML = "";
+
+   books.map(function (book, index) {
+
+    // This will create a row and add it inside tbody
+    createTableRow(book, tableBody,index+1);
+   })
 }
-// b.addEventListener('click',f);
+
+function handleFormSubmit () {
+    // read book data 
+    const bookName = bookNameElement.value;
+    bookNameElement.value = "";
+
+    // read issued to data 
+    const issuedTo = issueToElement.value;
+    issueToElement.value = "";
+
+    // create a book object with issueAd and default status
+
+    if(bookName && issuedTo) {
+        const book = {
+          name: bookName,
+          issuedTo: issuedTo,
+          issuedAt: new Date().toUTCString().substring(0,12),
+          status: "not returned",
+        };
+
+        books.push(book);
+        renderBooksInsideTable();
+    }
+    else {
+        alert("You are trying to enter empty details");
+    }
+    
+}
+
+btnElement.addEventListener('click', handleFormSubmit);
